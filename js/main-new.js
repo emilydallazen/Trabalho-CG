@@ -85,12 +85,10 @@ class Game {
   }
   
   update(delta) {
-    // Atualiza todos os sistemas
     this.playerControls.update(delta);
     this.lightingSystem.update(delta);
     this.world.update(delta);
-    
-    // Sistemas que dependem de informações do lighting
+ 
     const dayIntensity = this.lightingSystem.getDayIntensity();
     const dayTime = this.lightingSystem.getDayTime();
     
