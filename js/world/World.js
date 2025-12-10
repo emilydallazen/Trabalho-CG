@@ -11,6 +11,10 @@ export class World {
     this.lanterns = [];
     this.lanternLights = [];
     this.collisionObjects = [];
+    this.currentSound = null;
+    this.audioListener = null;
+    this.musicTracks = [];
+    this.currentTrackIndex = 0;
     this.createGround();
     this.loadCityObjects();
   }
@@ -387,5 +391,74 @@ export class World {
 
   async loadModel(path, position = { x: 0, y: 0, z: 0 }) {
     console.log(`Carregando modelo: ${path}`);
+  }
+
+  initAudioSystem(musicPaths, camera) {
+    this.audioListener = new THREE.AudioListener();
+    camera.add(this.audioListener);
+
+    const audioLoader = new THREE.AudioLoader();
+
+    musicPaths.forEach((path, index) => {
+      audioLoader.load(path, (buffer) => {
+        const sound = new THREE.Audio(this.audioListener);
+        sound.setBuffer(buffer);
+        sound.setLoop(true);
+        sound.setVolume(0.3);
+        this.musicTracks.push(sound);
+
+        if (index === 0) {
+          this.currentSound = sound;
+          this.setupAudioPlayback();
+        }
+      }, undefined, (error) => {
+        console.error(`Erro ao carregar música ${path}:`, error);
+      });
+    });
+
+    this.setupMusicControls();
+  }
+
+  setupAudioPlayback() {
+    const playAudio = () => {
+      if (this.currentSound && !this.currentSound.isPlaying) {
+        this.currentSound.play().catch((error) => {
+          console.log('Aguardando interação do usuário para tocar áudio:', error);
+        });
+      }
+      document.removeEventListener('click', playAudio);
+      document.removeEventListener('keydown', playAudio);
+    };
+
+    document.addEventListener('click', playAudio);
+    document.addEventListener('keydown', playAudio);
+    
+    console.log('Sistema de áudio carregado. Clique na tela ou pressione uma tecla para começar.');
+  }
+
+  setupMusicControls() {
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Digit1') {
+        this.nextTrack();
+      }
+    });
+  }
+
+  nextTrack() {
+    if (this.musicTracks.length === 0) return;
+
+    if (this.currentSound && this.currentSound.isPlaying) {
+      this.currentSound.stop();
+    }
+
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.musicTracks.length;
+    this.currentSound = this.musicTracks[this.currentTrackIndex];
+
+    if (this.currentSound) {
+      this.currentSound.play().catch((error) => {
+        console.log('Erro ao trocar música:', error);
+      });
+      console.log(`Tocando música ${this.currentTrackIndex + 1} de ${this.musicTracks.length}`);
+    }
   }
 }

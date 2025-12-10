@@ -87,7 +87,7 @@ export class PlayerControls {
     this.instructions.style.fontFamily = "Arial";
     this.instructions.style.textAlign = "center";
     this.instructions.innerHTML =
-      "<h2>Clique para jogar</h2><p>WASD para mover<br>Mouse para olhar<br>ESPAÇO para pular<br>ESC para sair</p>";
+      "<h2>Clique para jogar</h2><p>WASD para mover<br>Mouse para olhar<br>ESPAÇO para pular<br>1 para trocar música<br>ESC para sair</p>";
 
     document.body.appendChild(this.instructions);
 

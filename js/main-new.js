@@ -59,8 +59,13 @@ class Game {
     this.cloudSystem = new CloudSystem(this.scene);
     this.world = new World(this.scene);
     
-    // Cria o PlayerControls após o mundo estar disponível
     this.playerControls = new PlayerControls(this.camera, document.body, this.world);
+
+    const musicTracks = [
+      './assets/theme.mp3',
+      './assets/theme2.mp3'
+    ];
+    this.world.initAudioSystem(musicTracks, this.camera);
   }
   
   setupEventListeners() {
