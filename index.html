@@ -10,19 +10,15 @@
 			{
 				"imports": {
 					"three": "./js/three/three.module.js",
-					"three/addons/": "./js/jsm/",
-					"main" : "./js/main.js"
-
-
+					"three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/",
+					"main" : "./js/main-new.js"
 				}
 			}
 		</script>
 
 		<script type="module">
-			import * as THREE from 'three';
 			import { init } from 'main';
-			
-			init(THREE);
+			init();
 		</script>
 	</body>
 </html>
