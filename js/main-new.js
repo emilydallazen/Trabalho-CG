@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "./three/three.module.js";
 import { CAMERA_CONFIG } from "./config/constants.js";
 import { PlayerControls } from "./controls/PlayerControls.js";
 import { LightingSystem } from "./lighting/LightingSystem.js";
@@ -54,11 +54,18 @@ class Game {
   }
   
   setupSystems() {
-    this.playerControls = new PlayerControls(this.camera, document.body);
     this.lightingSystem = new LightingSystem(this.scene);
     this.starSystem = new StarSystem(this.scene);
     this.cloudSystem = new CloudSystem(this.scene);
     this.world = new World(this.scene);
+    
+    this.playerControls = new PlayerControls(this.camera, document.body, this.world);
+
+    const musicTracks = [
+      './assets/theme.mp3',
+      './assets/theme2.mp3'
+    ];
+    this.world.initAudioSystem(musicTracks, this.camera);
   }
   
   setupEventListeners() {
@@ -78,11 +85,10 @@ class Game {
   }
   
   update(delta) {
-    // Atualiza todos os sistemas
     this.playerControls.update(delta);
     this.lightingSystem.update(delta);
-    
-    // Sistemas que dependem de informações do lighting
+    this.world.update(delta);
+ 
     const dayIntensity = this.lightingSystem.getDayIntensity();
     const dayTime = this.lightingSystem.getDayTime();
     

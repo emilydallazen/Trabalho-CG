@@ -9,7 +9,7 @@ export const CAMERA_CONFIG = {
   FOV: 75,
   NEAR: 0.1,
   FAR: 500,
-  INITIAL_POSITION: { x: 0, y: 10, z: 0 }
+  INITIAL_POSITION: { x: 0, y: 1.7, z: 0 } // Altura de uma pessoa (1.7m)
 };
 
 export const LIGHTING_CONFIG = {
