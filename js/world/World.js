@@ -1,6 +1,7 @@
 import * as THREE from "../three/three.module.js";
 import { OBJLoader } from "../three/examples/jsm/loaders/OBJLoader.js";
 import { MTLLoader } from "../three/examples/jsm/loaders/MTLLoader.js";
+import { FBXLoader } from "../three/examples/jsm/loaders/FBXLoader.js";
 import { WORLD_CONFIG } from "../config/constants.js";
 
 export class World {
@@ -15,6 +16,10 @@ export class World {
     this.audioListener = null;
     this.musicTracks = [];
     this.currentTrackIndex = 0;
+    this.dragon = null;
+    this.dragonMixer = null;
+    this.dragonAnimations = [];
+    this.clock = new THREE.Clock();
     this.createGround();
     this.loadCityObjects();
   }
@@ -86,6 +91,10 @@ export class World {
         Math.random() * 1.0;
       light.intensity = flickerIntensity;
     });
+
+    if (this.dragonMixer) {
+      this.dragonMixer.update(delta);
+    }
   }
 
   async loadCityObjects() {
@@ -144,6 +153,9 @@ export class World {
         console.error(`Erro ao carregar objeto ${objConfig.name}:`, error);
       }
     }
+
+    // Load dragon next to the tree
+    this.loadDragon();
   }
 
   async loadOBJWithMTL(objectName, position = { x: 0, y: 0, z: 0 }, scale = 1) {
@@ -290,6 +302,7 @@ export class World {
       'tree-high': { width: 3, height: 8, depth: 3 },
       'windmill': { width: 4, height: 10, depth: 4 },
       'stall-red': { width: 3, height: 3, depth: 2 },
+      'dragon': { width: 4, height: 3, depth: 4 },
       'default': { width: 2, height: 2, depth: 2 }
     };
 
@@ -387,6 +400,54 @@ export class World {
         size: obj.size
       }))
     };
+  }
+
+  loadDragon() {
+    const fbxLoader = new FBXLoader();
+    const textureLoader = new THREE.TextureLoader();
+
+    fbxLoader.load(
+      './assets/fbx/Dragon3.fbx',
+      (obj) => {
+        obj.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            const texture = textureLoader.load('./assets/fbx/Dragon_ground_color.jpg');
+            child.material = new THREE.MeshStandardMaterial({ map: texture });
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        // Position next to the tree (tree is at x: 15, z: -8)
+        obj.position.set(20, 0, -8);
+        obj.scale.set(0.005, 0.005, 0.005);
+
+        this.scene.add(obj);
+        this.dragon = obj;
+        this.cityObjects.push(obj);
+
+        // Setup animation
+        if (obj.animations && obj.animations.length > 0) {
+          this.dragonMixer = new THREE.AnimationMixer(obj);
+          
+          // Play flying animation (index 1 from example)
+          const flyingAnimation = this.dragonMixer.clipAction(obj.animations[1]);
+          this.dragonAnimations.push(flyingAnimation);
+          flyingAnimation.play();
+          
+          console.log('Dragão carregado com sucesso!');
+        }
+
+        // Add collision for the dragon
+        this.addCollisionObject(obj, 'dragon', { x: 20, y: 0, z: -8 }, 1);
+      },
+      (progress) => {
+        console.log('Carregando dragão: ' + (progress.loaded / progress.total * 100) + '%');
+      },
+      (error) => {
+        console.error('Erro ao carregar dragão:', error);
+      }
+    );
   }
 
   async loadModel(path, position = { x: 0, y: 0, z: 0 }) {
